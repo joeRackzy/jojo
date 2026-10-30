@@ -1,7 +1,33 @@
+from pathlib import Path
+import json
+JSON_FILE = Path(__file__).resolve().parent / "work_flow.json"
+
+ticket_count = 1
+tickets = []
+def load_ticket():
+    if not JSON_FILE.exists():
+        return []
+    try:
+        with open(JSON_FILE, "r")as file:
+           return json.load(file)
+    except json.JSONDecodeError:
+            return [] 
+
+def save_ticket(ticket):
+    tickets = load_ticket()
+    tickets.append(ticket)    
+
+    with open(JSON_FILE, "w") as file:
+        json.dump(tickets,file, indent=2)       
+
 def create_ticket():
+    global ticket_count
+
+    ticket_id = f"T{str(ticket_count).zfill(3)}"
+    ticket_count += 1
     
     while True:
-        student_name = input("what is you name? ")
+        student_name = input("what is you name? ".strip())
         try:
            
             if student_name == "":
@@ -22,98 +48,124 @@ def create_ticket():
         problem_discription =  (input("what are the  problem you are facing ").strip())
         try:
             if problem_discription == "":
-                raise ValueError(f"\t{"="*5} discription must no be empty try again {"="*5}\n".upper())
+                raise ValueError(f"\t{"="*5} discription must no be empty try again {"="*5}\n").upper()
         except (ValueError)as error:
             print(error)
             continue
         
         try:
             problem_discription = int(problem_discription)
-            if not isinstance(problem_discription, int):
-                raise ValueError("it must be a whole number from (1-5)")
+            if problem_discription < 1:
+                raise ValueError("choose from 1,2,3,4,5")
+            if problem_discription > 5:
+                raise ValueError("choose from 1,2,3,4,5")
         except (ValueError) as mumu:
                 print(mumu)
-                continue    
-
+                continue   
         if problem_discription  == 1:
-            problem = "wifi is down"
-            print(problem)
+            problem_discription = "wifi is down"
+            print(problem_discription)
 
         elif problem_discription == 2:
-            problem = "student can access the school portal"
-            print(problem)
+            problem_discription = "student cannot access the school portal"
+            print(problem_discription)
 
         elif problem_discription == 3:
-            problem = "electricity issues"
-            print(problem)
+            problem_discription = "electricity issues"
+            print(problem_discription)
 
         elif problem_discription == 4:
-            problem = "bank issues"
-            print(problem) 
+            problem_discription = "bank issues"
+            print(problem_discription) 
 
         elif problem_discription == 5:
             while True:
-                if problem == "":
-                    raise ValueError("they must be a issue note")
-                problem = int(input("write in detail what is the issue? ")).strip()
-                problem = str(problem)
+                problem_discription =input("write in detail what is the issue? ").strip()
+                
                 try: 
-                    if not isinstance(problem, str):  
+                    if problem_discription.isdigit():
                       raise ValueError("it must write in detail")
-                    if not problem:
-                        raise ValueError("the must be a problem")
+                  
                 except (ValueError)as file:
                     print(file)
                     continue
-                print(problem)
-                break      
+                print(problem_discription)
+                break
         else:
             print("invalid input try again")
-            continue                 
+            continue                    
         break
-    return student_name,problem_discription
-           
-        
-        
+    while True: 
+        affected_users = input("How ,many users are affected? ".strip())
+        try:
+            if affected_users == "":
+                 raise ValueError("the must be an affected user")
             
-
-           
-        
-    
-    
-def input_validation(urgency,affected_users):
-
-    if isinstance(affected_users, (float, bool)):
-            raise ValueError("affected user must be a whole number")
-    
-    try:
-        affected_users = int(affected_users)
-    except ValueError:
-        raise ValueError("invalid input, it must be an number not other words")   
-
-    if urgency not in ["high", "medium", "low"]:
-        raise ValueError("invalid input choos from (high medium low)")        
-    
-    if affected_users < 1:
-        raise ValueError("at least one user must be affected and must be a positive number ")
-
-    if not isinstance(affected_users, int):
-        raise ValueError("invalid input, it must be an number not other words")
-    return affected_users,urgency
-
-
-def calculate_priority(urgency, affected_users,priority):
-
-    if urgency == "high" and  affected_users >= 10:
+            affected_users = int(affected_users)
+            if affected_users < 1:
+                raise ValueError("at least one user must be affected and must be a positive number ")
+        except (ValueError) as pig:
+            print(f"{pig} it must be an whole number")
+            continue
+        print(affected_users)     
+        break
+    while True:
+            print("\nlist of urgencys".upper())
+            print("1. High")
+            print("2. Medium")
+            print("3. Low")
+            urgency =  (input("\nwhat is the urgency choose from 1,2,3").strip())
+            try:
+                urgency = int(urgency)
+                if not urgency:
+                    raise ValueError("urgency most not be empty")
+              
+                if urgency < 1:
+                    raise ValueError("choose from 1,2,3 option")
+                if urgency > 3:
+                    raise ValueError("choose from 1,2,3 option")
+            except (ValueError) as bugi:
+                print(bugi)
+                continue
+            if urgency == 1:
+                urgency = "High"
+            elif urgency == 2:
+                urgency = "Medium"
+            elif urgency == 3:
+                urgency = "Low"
+            else:
+                print("invalid input choose from 1-3 option") 
+                continue
+            break
+         
+    if urgency == "High" and  affected_users > 10:
         priority = "critical"
+        print(priority)
 
-    elif urgency == "high" or affected_users >= 10:
+    elif urgency == "High" or affected_users >= 10:
         priority = "high"
+        print(priority)
 
-    elif urgency == "meduim" or affected_users >= 5:
-        priority = "meduim"    
+    elif urgency == "Medium" or affected_users >= 5:
+        priority = "medium"  
+        print(priority)  
 
-    elif urgency == "low"  or affected_users >=1: 
-        priority = "low"   
-    return priority
-create_ticket()  
+    else:
+        priority = "low" 
+        print(priority)  
+
+    ticket = {
+              "ticket_id": ticket_id,
+              "name": student_name,
+              "problem": problem_discription,
+              "urgency": urgency,
+              "affected useer": affected_users,
+              "priority": priority
+              }
+    tickets.append(ticket)
+    print(tickets)
+
+    
+    return student_name,problem_discription,urgency,affected_users,priority,ticket_id
+create_ticket()
+
